@@ -17,7 +17,6 @@ def main(params):
 
 if __name__ == '__main__':
 
-    # --year=2015 --month=1 --day=1 --hour=15
     parser = argparse.ArgumentParser(description='etl ghdata to parquet')
 
     parser.add_argument('--year', required=True, help='year at the created_at')
