@@ -1,7 +1,7 @@
 # db.tf | Database Configuration
 
 resource "google_sql_database_instance" "instance" {
-    name                = "${var.app_name}-db-instance"
+    name                = "${var.app_name}-db-instance3"
     region              = var.region
     database_version    = "POSTGRES_14"
     deletion_protection = false

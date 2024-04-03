@@ -17,7 +17,7 @@ variable "container_memory" {
 variable "project_id" {
   type        = string
   description = "The name of the project"
-  default     = "unique-gcp-project-id"
+  default     = "capstone-project-417800"
 }
 
 variable "region" {
@@ -32,7 +32,13 @@ variable "zone" {
   default     = "us-west2-a"
 }
 
-variable "repository" {
+variable "repository_id" {
+  type        = string
+  description = "The name of the Artifact Registry repository to be created"
+  default     = "mage-data-prep"
+}
+
+variable "repository_name" {
   type        = string
   description = "The name of the Artifact Registry repository to be created"
   default     = "mage-data-prep"
@@ -48,12 +54,13 @@ variable "database_password" {
   type        = string
   description = "The password of the Postgres database."
   sensitive   = true
+  default = "1234"
 }
 
 variable "docker_image" {
   type        = string
   description = "The Docker image url in the Artifact Registry repository to be deployed to Cloud Run"
-  default     = "region-docker.pkg.dev/project_id/repository_name/mageai"
+  default     = "mageai/mageai:latest"
 }
 
 variable "domain" {

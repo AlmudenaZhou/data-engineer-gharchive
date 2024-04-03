@@ -1,20 +1,4 @@
 # main.tf
-
-terraform {
-  required_version = ">= 0.14"
-
-  required_providers {
-    # Cloud Run support was added on 3.3.0
-    google = ">= 3.3"
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
-}
-
 # #############################################
 # #               Enable API's                #
 # #############################################
@@ -66,7 +50,7 @@ resource "google_project_service" "sqladmin" {
 # # Create Artifact Registry Repository for Docker containers
 # resource "google_artifact_registry_repository" "my_docker_repo" {
 #   location = var.region
-#   repository_id = var.repository
+#   repository_id = var.repository_id
 #   description = "My docker repository"
 #   format = "DOCKER"
 #   depends_on = [time_sleep.wait_30_seconds]
@@ -98,7 +82,7 @@ resource "google_cloud_run_service" "run_service" {
   template {
     spec {
       containers {
-        image = var.docker_image
+        image = var.docker_image  # "gcr.io/${var.project_id}/${var.repository_name}:latest"
         command = ["mage", "start", "default_repo", "--manage-instance", "1"]
         ports {
           container_port = 6789
@@ -141,20 +125,20 @@ resource "google_cloud_run_service" "run_service" {
           name  = "path_to_keyfile" # Try not to change this environment variable name
           value = var.path_to_keyfile
         }
-        volume_mounts {
-          mount_path = "/secrets/gcp"
-          name       = "secrets-service_account_credentials"
-        }
-      }
-      volumes {
-        name = "secrets-service_account_credentials"
-        secret {
-          secret_name  = "service_account_credentials"
-          items {
-            key  = "latest"
-            path = "service_account_credentials"
-          }
-        }
+      #   volume_mounts {
+      #     mount_path = "/secrets/gcp"
+      #     name       = "secrets-service_account_credentials"
+      #   }
+      # }
+      # volumes {
+      #   name = "secrets-service_account_credentials"
+      #   secret {
+      #     secret_name  = "service_account_credentials"
+      #     items {
+      #       key  = "latest"
+      #       path = "service_account_credentials"
+      #     }
+      #   }
       }
     }
 
@@ -189,88 +173,9 @@ resource "google_cloud_run_service" "run_service" {
 }
 
 # Allow unauthenticated users to invoke the service
-resource "google_cloud_run_service_iam_member" "run_all_users" {
-  service  = google_cloud_run_service.run_service.name
-  location = google_cloud_run_service.run_service.location
-  role     = "roles/run.invoker"
-  member   = "allUsers"
-}
-
-# Display the service IP
-output "service_ip" {
-  value = module.lb-http.external_ip
-}
-
-# ----------------------------------------------------------------------------------------
-# Create the Cloud Run DBT Docs service and corresponding resources, uncomment if needed
-
-# resource "google_cloud_run_service" "dbt_docs_service" {
-#   name = "${var.app_name}-docs"
-#   location = var.region
-
-#   template {
-#     spec {
-#       containers {
-#         image = var.docker_image
-#         ports {
-#           container_port = 7789
-#         }
-#         resources {
-#           limits = {
-#             cpu     = var.container_cpu
-#             memory  = var.container_memory
-#           }
-#         }
-#         env {
-#           name  = "FILESTORE_IP_ADDRESS"
-#           value = google_filestore_instance.instance.networks[0].ip_addresses[0]
-#         }
-#         env {
-#           name  = "FILE_SHARE_NAME"
-#           value = "share1"
-#         }
-#         env {
-#           name  = "DBT_DOCS_INSTANCE"
-#           value = "1"
-#         }
-#       }
-#     }
-
-#     metadata {
-#       annotations = {
-#         "autoscaling.knative.dev/minScale"         = "1"
-#         "run.googleapis.com/execution-environment" = "gen2"
-#         "run.googleapis.com/vpc-access-connector"  = google_vpc_access_connector.connector.id
-#         "run.googleapis.com/vpc-access-egress"     = "private-ranges-only"
-#       }
-#     }
-#   }
-
-#   traffic {
-#     percent         = 100
-#     latest_revision = true
-#   }
-
-#   metadata {
-#     annotations = {
-#       "run.googleapis.com/launch-stage" = "BETA"
-#       "run.googleapis.com/ingress"      = "internal-and-cloud-load-balancing"
-#     }
-#   }
-
-#   autogenerate_revision_name = true
-
-#   # Waits for the Cloud Run API to be enabled
-#   depends_on = [google_project_service.cloudrun]
-# }
-
-# resource "google_cloud_run_service_iam_member" "run_all_users_docs" {
-#   service  = google_cloud_run_service.dbt_docs_service.name
-#   location = google_cloud_run_service.dbt_docs_service.location
+# resource "google_cloud_run_service_iam_member" "run_all_users" {
+#   service  = google_cloud_run_service.run_service.name
+#   location = google_cloud_run_service.run_service.location
 #   role     = "roles/run.invoker"
 #   member   = "allUsers"
-# }
-
-# output "docs_service_ip" {
-#   value = google_compute_global_address.docs_ip.address
 # }
