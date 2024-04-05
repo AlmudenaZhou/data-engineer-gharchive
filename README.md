@@ -17,7 +17,8 @@ Steps:
 Extra considerations:
 - Steps 1-3 will be orchestrated using Mage and will be considered as the ETL phase.
 - All Google Cloud infrastructure will be handled by Terraform (IaC)
-
+- The batch data has been run at 2015-01-01 to 2015-01-03 instead of more current data due to storage, computation, time and costs.
+ 
 ## Google credentials
 
 For all the cloud-based steps you will need the credentials.json as secrets.json 
