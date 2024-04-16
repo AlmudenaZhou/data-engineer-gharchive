@@ -1,6 +1,3 @@
-TODO: steps with numbers instead of -
-TODO: add partitionBy and clusterBy to pyspark.py
-
 # data-engineer-gharchive
 
 ## Index
