@@ -47,14 +47,16 @@ if __name__ == '__main__':
     df = add_last_name_by_id(df, id_colname="repo_id",
                              name_colname="repo_name",
                              new_colname="last_repo_name")
+    
+    df = df.withColumnRenamed("created_at", "action_time")
+    df = df.withColumn("created_at", F.current_timestamp())
 
-    df = df.select("type", "created_at", "last_repo_name", "last_org_login", "last_actor_login")
+    df = df.select("type", "action_time", "last_repo_name", "last_org_login", "last_actor_login", "created_at")
 
-output = 'capstone-project-417800.gharchive_capstone_project.data'
-
-
-df.repartition(1) \
-    .write.format('bigquery') \
+    df.repartition(1) \
+        .write.format('bigquery') \
+        .option("partitionField", "action_time") \
+        .option("clusteredFields", "last_actor_login") \
         .option("table", output) \
         .mode("overwrite") \
         .save()
