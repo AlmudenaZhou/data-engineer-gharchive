@@ -1,80 +1,82 @@
 # Index
 
-- [Simple Data Analysis](#simple-data-analysis)
-    - [Possible useful questions for the data](#possible-useful-questions-for-the-data)
-        - [Possibilities for the top contributors](#possibilities-for-the-top-contributors)
-    - [Things to do](#things-to-do)
+- [Data Analysis](#data-analysis)
+    - [Questions about the data](#questions-about-the-data)
+    - [Potential data cleaning approaches for ID-Name columns](#potential-data-cleaning-approaches-for-id-name-columns)
+    - [Final transformations](#final-transformations)
 - [Spark](#spark)
+    - [Steps](#steps)
+    - [How to use](#how-to-use)
+        - [Dataproc in Google Cloud](#dataproc-in-google-cloud)
+        - [Local](#local)
 
-# Simple Data Analysis
+# Data Analysis
 
-I will consider the schema and the questions I want to answer in the dashboard to plan the steps to perform in spark
+In this phase, I conducted an analysis of the data to formulate questions and determine the most suitable transformations based on the data schema and business requirements.
 
-## Possible useful questions for the data:
+## Questions about the data:
 
-- **Top contributors?** Columns needed: actor_id / actor_login -> new column with the last actor_login for the actor_id?
-- **N commits by hour?** Columns needed: type and created_at
-- **N actions by hour?** Columns needed: any column and create_at
-- **% organization by day?** Columns needed: org_id and created_at
+- **Top contributors?** Columns needed: actor_id / actor_login
+- **Distribution of event types** Columns needed: type
+- **Total number of events** Columns needed: any column
 
+## Potential data cleaning approaches for ID-Name columns:
 
-### Possible cleaning for id-name columns:
+Here, I discuss the specific case of `actor_login` and `actor_id`, which can be generalized to `org_login`-`org_id` and `repo_name`-`repo_id`.
 
-I will describe the specific case of `actor_login` and `actor_id`, but will be extrapolated for `org_login`-`org_id` and `repo_name`-`repo_id`.
-
-1. New column with the last `actor_login` for the `actor_id`?
-
+1. **Creation of a new column using the last `actor_login` for the `actor_id`**
+    
     Pros:
-    - Avoid problems with renamed users (we don't know if for the same `actor_id` always the same `actor_login`)
-    - ids generally more stable
-    - Easier in terms of using it for the report/dashboard. Direct conversion.
-    - Easier than having two tables: one for the events and another for the users.
+    - Mitigates issues with renamed users, ensuring consistency
+    - IDs tend more stable over time
+    - Simplifies report/dashboard creation by providing a direct conversion
+    - Avoids the need for maintaining separate tables for events and users.
 
     Cons:
-    - More complexity than using the `actor_login` or `actor_id`
-    - Use the last one have problems with backwards compability. You have to change all the previous records if someone change their name.
-    - Bad scalability
+    - Adds complexity compared to using the `actor_login` or `actor_id`
+    - May introduce complications with backward compatibility, requiring updates to previous records if a user changes their name
+    - Scalability problems
 
-1. Return `actor_id` or `actor_login` (first more stable but less interpretable and the second less stable but more interpretable):
-
-    Pros:
-    - Most simple
-
-    Cons:
-    - Biased
-
-1. Make another table with the `actor_id` - last `actor_login` (you need to join the tables for the dashboard)
+1. **Usage of `actor_id` or `actor_login`** (`actor_id` more stable but less interpretable and `actor_login` less stable but more interpretable):
 
     Pros:
-    - Most flexible
-    - Solves the backwards compatibility
-    - Only needs to update renamed users and insert new ones
+    - Simplicity
 
     Cons:
-    - 2 tables
-    - More storage
-    - Having to join the tables afterwards to end up with the first table option
+    - Potential bias in the data
+
+1. Creation of a table, mapping `actor_id` to the last `actor_login`
+
+    Pros:
+    - Offers the most flexibility
+    - Solves the backwards compatibility issues
+    - Only requires updates for renamed users and inserts for new ones
+
+    Cons:
+    - Requires managing two tables
+    - Increases storage requirements
+    - Additional step of joining tables is necessary to achieve the desired format
 
 
 Conclusions:
 
-1. If the majority of queries or the only one is to a table of a predefined time (not all the history) this can be a good option to avoid bias without having problems with the scalability. 
-2. For results that the risk of being biased are not a problem (`actor_login`) or for an internal report where you can look for the name of the person afterwards (`actor_id`)
-3. A more real project, having an intermediate table with all the actor information (inserting rows for new users and also for each updated information, user history) -> get the simplified table
+1. If queries are limited to a predefined time range and avoiding bias is crucial, creating a new column can effectively mitigate bias without scalability concerns
+2. For less critical results or internal reports, `actor_login` may suffice, while `actor_id` can be used for more robust analysis.
+3. In larger projects, maintaining an intermediate table with comprehensive actor information might be beneficial, but it entails additional costs and maintenance
 
 
-In this project, I will use the **first approach**, new column.
-- The scalability is not a problem, I will only run the dashboard once and for a few days of data. 
-- I don't choose the 2 (`actor_login` or `actor_id`) because I want to practice a bit of Spark, but I consider that this would be the best option in this case. 
-- I don't want the extra cost and maintenance of the third one.
+For this project, **I adopted the first approach of creating a new column**:
+- Scalability isn't a concern for this one-time dashboard
+- Although the second option is superior, I wanted to practice Spark skills.
+- The third option involves extra costs and maintenance, which I prefer to avoid.
 
-## Things to do:
+## Final transformations:
 
-- drop the `payload` and `other` columns: json with unstable keys
-- drop columns that are not useful for the analysis
-- `created_at` changed the name to `action_time`
-- Add new column `created_at` with the current timestamp
-- new columns with the last name by id:
+- Drop the payload and other columns due to their unstable key structure
+- Eliminate columns irrelevant to the analysis
+- Rename the created_at column to action_time
+- Add a new column `created_at` with the current timestamp
+- Implement new columns for the last name associated with each ID:
     - `last_actor_login` with the last `actor_login` for each `actor_id`
     - `last_org_login` with the last `org_login` for each `org_id`
     - `last_repo_name` with the last `repo_name` for each `repo_id`
@@ -83,34 +85,34 @@ In this project, I will use the **first approach**, new column.
 
 ## Steps:
 
-1. Load the data from the parquet_folder using wildcards for the period you want (Google Storage or locally)
-2. Perform the [Things to do](#things-to-do) to create a new table
-3. Save the new table (BigQuery or locally)
+1. Load the data from the parquet_folder using wildcards for the desired period (Google Storage or locally)
+2. Implement the [Final transformations](#final-transformations) to create a new table.
+3. Save the new table (BigQuery or locally). The table is partitioned by action_time to accommodate the data retrieved over time intervals. Additionally, it's clustered by last_actor_login to facilitate user-based analysis.
 
 
 ## How to use:
 
 ### DataProc in Google Cloud
 
-1. Enter Google Cloud Console, Dataproc API and habilitate it.
-1. Create a cluster. I create a Computer Engine.
-1. Create a job filling correctly the fields
+1. Access the Google Cloud Portal and enable the Dataproc API.
+1. Create a cluster. I utilized a Computer Engine for this step.
+1. Create a job and fill the fields
 
-The complete steps are explain in this video: [Connecting Spark to Big Query](https://www.youtube.com/watch?v=HIm2BOj8C0Q&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=69)
+For detailed instructions, refer to this video: [Connecting Spark to Big Query](https://www.youtube.com/watch?v=HIm2BOj8C0Q&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=69)
 
 
 ### Local
 
 **Setup**:
-You need to have installed the following jars:
-- spark-bigquery-with-dependencies
-- google-api-client
-- gcs-connector-hadoop3
-And save them in the jars folder at the spark folder
+
+Make sure you have the following jars installed and saved in the jars folder within the Spark directory:
+- `spark-bigquery-with-dependencies`
+- `google-api-client`
+- `gcs-connector-hadoop3`
 
 
-run the python \__main.__.py with the args:
+Run the Python script \_\_main__.py with the following arguments:
 - `--input (-i)`: path (wildcards can be used) where your data is located
-- `--output (-o)`: project_id.dataset_id.table where the data will be saved. The projec_id and the dataset_id(`bq_dataset_name`) has to be the same as the ones specified at `variables.tf` in the terraform folder. The table must not exist.
+- `--output (-o)`: project_id.dataset_id.table where the data will be saved. The projec_id and the dataset_id(`bq_dataset_name`) must match those specified in the `variables.tf` file in the Terraform folder. The table must not exist.
 
-I left the temporary folder needed as the generic gs bucket gharchive_capstone_project, since it's already been created. However, it would be cleaner to create one specifically for that. Important, the gs bucket it must be already created at pyspark code runtime.
+Note: The temporary folder needed is set as the generic Google Storage bucket gharchive_capstone_project. However, it would be cleaner to create a dedicated bucket. Ensure the Google Storage bucket is already created at runtime.
