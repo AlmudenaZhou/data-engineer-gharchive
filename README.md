@@ -48,7 +48,7 @@ For all the cloud-based steps, google requires credentials. Follow these steps t
 1. Compressed data is converted into a list of dictionaries with[transform_data.py](etl/transform_data.py)
 1. The list of dictionaries is transformed into a dataframe using [transform_data.py](etl/transform_data.py)
 1. Columns with fixed json keys (actor, repo, org) are expanded into more columns with [transform_data.py](etl/transform_data.py)
-1. The input data is checked and converted into the predefined schema: [convert_data_to_schema](etl/convert_data_to_schema.py):
+1. The input data is checked and converted into the predefined schema: [convert_data_to_schema.py](etl/convert_data_to_schema.py):
     1. Extra columns are deleted
     1. Missing columns are added
     1. Columns are checked and changed to dtype
@@ -73,7 +73,7 @@ For bulk data processing, I used the backfilled mage feature. The calls are made
 
 To download data hourly, I configured an hourly trigger to automatically run the pipeline.
  
-The repository has been configured as a submodule to facilitate synchronization with Google Cloud Run.: [Mage Repository](https://github.com/AlmudenaZhou/mage-gharchive-etl-orchestration)
+The repository has been configured as a submodule to facilitate synchronization with Google Cloud Run: [Mage Repository](https://github.com/AlmudenaZhou/mage-gharchive-etl-orchestration)
 
 ## Terraform
 
