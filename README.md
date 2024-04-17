@@ -73,7 +73,7 @@ For bulk data processing, I used the backfilled mage feature. The calls are made
 
 To download data hourly, I configured an hourly trigger to automatically run the pipeline.
  
-Setup and notes in: [Mage Setup](mage-gharchive-etl-orchestration/README.md)
+The repository has been configured as a submodule to facilitate synchronization with Google Cloud Run.: [Mage Repository](https://github.com/AlmudenaZhou/mage-gharchive-etl-orchestration)
 
 ## Terraform
 
