@@ -132,6 +132,3 @@ In the table labeled `ACTION TYPE BY ACTOR`, where PushEvent type contributions 
   - GitHub actions: https://docs.mage.ai/production/ci-cd/local-cloud/github-actions
   - GitHub Sync
 - Automated Spark job execution using Dataproc and Google Scheduler in Google Cloud, scheduled to run hourly.
-
-
-- Path docker image: "region-docker.pkg.dev/project_id/repository_name/mageai"
