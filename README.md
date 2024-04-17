@@ -100,7 +100,8 @@ Setup and notes in: [Mage Setup](mage-gharchive-etl-orchestration/README.md)
 
 ## Spark
 
-I read the parquet files generated at the [ETL phase](#etl) (at the Google Storage Bucket), transformed them using pyspark and loaded them into a BigQuery table.
+I read the parquet files generated at the [ETL phase](#etl) (at the Google Storage Bucket), transformed them using pyspark and loaded them into a BigQuery table. The table is partitioned by action_time to accommodate the data retrieved over time intervals. Additionally, it's clustered by last_actor_login to facilitate user-based analysis.
+
 
 Data transformations:
 - Deleted unneccessary columns
@@ -131,3 +132,6 @@ In the table labeled `ACTION TYPE BY ACTOR`, where PushEvent type contributions 
   - GitHub actions: https://docs.mage.ai/production/ci-cd/local-cloud/github-actions
   - GitHub Sync
 - Automated Spark job execution using Dataproc and Google Scheduler in Google Cloud, scheduled to run hourly.
+
+
+- Path docker image: "region-docker.pkg.dev/project_id/repository_name/mageai"
