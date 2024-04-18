@@ -14,7 +14,7 @@
 
 ## Problem Statement
 
-For monitoring purposes is important to know the top contributors to GitHub in a specified date and analyze the type of actions the users perform the most, apart from commits. 
+For monitoring purposes, it is important to know the top contributors to GitHub in a specified date and analyze the type of actions the users perform the most, apart from commits. 
 
 For this, I used the data from [GH Archive](https://www.gharchive.org/), which stores information of all the events performed in GitHub, aggregated into hourly archives.
 
@@ -45,7 +45,7 @@ For all the cloud-based steps, google requires credentials. Follow these steps t
 ### ETL Workflow:
 
 1. The latest hour's data from gharchive is downloaded in .json.gzip format using [download_data.py](etl/download_data.py)
-1. Compressed data is converted into a list of dictionaries with[transform_data.py](etl/transform_data.py)
+1. Compressed data is converted into a list of dictionaries with [transform_data.py](etl/transform_data.py)
 1. The list of dictionaries is transformed into a dataframe using [transform_data.py](etl/transform_data.py)
 1. Columns with fixed json keys (actor, repo, org) are expanded into more columns with [transform_data.py](etl/transform_data.py)
 1. The input data is checked and converted into the predefined schema: [convert_data_to_schema.py](etl/convert_data_to_schema.py):
@@ -69,7 +69,7 @@ Make sure to specify the year, month, day, and hour for your data.
 
 ### Mage orchestrator
 
-For bulk data processing, I used the backfilled mage feature. The calls are made individually and depended on the environment variable execution_date to backfill dates that were missing.
+For bulk data processing, I used the backfilled mage feature. The calls are made individually and depend on the environment variable execution_date to backfill dates that were missing.
 
 To download data hourly, I configured an hourly trigger to automatically run the pipeline.
  
