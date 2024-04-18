@@ -89,7 +89,10 @@ The repository has been configured as a submodule to facilitate synchronization 
 1. After executing terraform apply:
     1. Allow manual invocation by unauthenticated users: Navigate to Security => Authentication => Allow unauthenticated invocations.
     1. Networking => Ingress Control => All
-    1. Add in settings the Git config 
+1. Utilize the URL in the web browser to access the Mage server
+1. In the settings tab, include the Git configuration within Mage to upload the code for execution
+1. Check the trigger and phases has been correctly uploaded
+1. Execute Mage to download batch data as specified in its phase, or keep the compute instance active to enable automatic execution of the ETL process based on the set trigger
 
 ### Additional Notes:
 - For users with a free GCP account, delete load_balancer.tf and remove the output service_ip from main.tf in the Mage module.
