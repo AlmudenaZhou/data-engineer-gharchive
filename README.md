@@ -20,7 +20,7 @@ For this, I used the data from [GH Archive](https://www.gharchive.org/), which s
 
 From the technical point of view, a cleaner version of raw data in a data lake and processed data in a data warehouse are needed so that they can be used to make the dashboard.
 
-The pipeline should be able to handle batch data processing for historical analysis (days, months,...) and real-time processing with hourly triggers.
+The pipeline should be able to handle batch data processing for historical analysis (days, months,...) and current time processing with hourly triggers.
 
 All Google Cloud infrastructure has been handled using Terraform (IaC).
 
