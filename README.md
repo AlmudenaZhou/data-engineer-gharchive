@@ -30,6 +30,9 @@ All Google Cloud infrastructure has been handled using Terraform (IaC).
 - **Git/GitHub**: Code versioning
 - **Pyspark, Apache Spark 3**: Distributed data transformations
 - **Google Cloud**: Cloud provider
+    - **Cloud Run**: Mage hosting
+    - **Google Cloud Storage**: Data Lake
+    - **Google BigQuery**: Data Warehouse
 - **Terraform**: Infrastructure as Code (IaC)
 - **Mage**: Orchestration
 - **Looker Studio**: Dashboard creation
@@ -106,6 +109,8 @@ You can execute the ETL process without using an orchestrator by running the fol
 Make sure to specify the year, month, day, and hour for your data.
 
 ### Mage orchestrator
+
+![image](img/orchestration-workflow.png)
 
 For bulk data processing, I used the backfilled mage feature. The calls are made individually and depend on the environment variable execution_date to backfill dates that were missing.
 
