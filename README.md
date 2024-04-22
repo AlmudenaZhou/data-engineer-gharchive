@@ -24,7 +24,19 @@ The pipeline should be able to handle batch data processing for historical analy
 
 All Google Cloud infrastructure has been handled using Terraform (IaC).
 
+### Technologies:
+
+- **Python**: Scripting
+- **Git/GitHub**: Code versioning
+- **Pyspark, Apache Spark 3**: Distributed data transformations
+- **Google Cloud**: Cloud provider
+- **Terraform**: Infrastructure as Code (IaC)
+- **Mage**: Orchestration
+- **Looker Studio**: Dashboard creation
+
 ### Workflow summary:
+1. Download google credentials
+1. Terraform deployment
 1. ETL phase orchestrated with Mage:
     1. Download the data from the provided link 
     1. Clean the data structure and homogenize the data following a predefined schema
@@ -39,6 +51,32 @@ For all the cloud-based steps, google requires credentials. Follow these steps t
 1. Download credentials.json following the instructions here: https://cloud.google.com/iam/docs/keys-create-delete
 1. Rename the json into `secrets.json`
 1. Save it into the terraform folder
+
+## Terraform
+
+### Deployment Resources:
+
+- **Mage Terraform Module**: deploy the ETL pipeline via Cloud Run. Access the module [here](https://github.com/mage-ai/mage-ai-terraform-templates/tree/master/gcp-dev).
+- **Google Storage**: Data lake for storing cleaner raw data.
+- **BigQuery Table**: Data warehouse for storing processed data.
+
+### Running the Deployment:
+1. Modify the project ID and variables in the variables.tf file.
+1. Ensure the credentials are available in the path specified by the credentials variable.
+1. After executing terraform apply:
+    1. Allow manual invocation by unauthenticated users: Navigate to Security => Authentication => Allow unauthenticated invocations.
+    1. Networking => Ingress Control => All
+1. Utilize the URL in the web browser to access the Mage server
+1. In the settings tab, include the Git configuration within Mage to upload the code for execution
+1. Check the trigger and phases has been correctly uploaded
+1. Execute Mage to download batch data as specified in its phase, or keep the compute instance active to enable automatic execution of the ETL process based on the set trigger
+
+### Additional Notes:
+- For users with a free GCP account, delete load_balancer.tf and remove the output service_ip from main.tf in the Mage module.
+- If the credentials specified in variables.tf fail, export the credentials by running the command: `export GOOGLE_APPLICATION_CREDENTIALS="secrets.json"` in the terminal.
+- If the SQL database is created and deleted, wait before reusing the same name to avoid Error 409. Modify the name in the db.tf Google SQL database instance.
+- The volume secrets and IAM user have been commented due to role permissions in GCP.
+- During apply and destroy, multiple runs may be necessary with intervals between each run to allow time for deploying/deleting dependent resources.
 
 ## ETL
 
@@ -75,31 +113,6 @@ To download data hourly, I configured an hourly trigger to automatically run the
  
 The repository has been configured as a submodule to facilitate synchronization with Google Cloud Run: [Mage Repository](https://github.com/AlmudenaZhou/mage-gharchive-etl-orchestration)
 
-## Terraform
-
-### Deployment Resources:
-
-- **Mage Terraform Module**: deploy the ETL pipeline via Cloud Run. Access the module [here](https://github.com/mage-ai/mage-ai-terraform-templates/tree/master/gcp-dev).
-- **Google Storage**: Data lake for storing cleaner raw data.
-- **BigQuery Table**: Data warehouse for storing processed data.
-
-### Running the Deployment:
-1. Modify the project ID and variables in the variables.tf file.
-1. Ensure the credentials are available in the path specified by the credentials variable.
-1. After executing terraform apply:
-    1. Allow manual invocation by unauthenticated users: Navigate to Security => Authentication => Allow unauthenticated invocations.
-    1. Networking => Ingress Control => All
-1. Utilize the URL in the web browser to access the Mage server
-1. In the settings tab, include the Git configuration within Mage to upload the code for execution
-1. Check the trigger and phases has been correctly uploaded
-1. Execute Mage to download batch data as specified in its phase, or keep the compute instance active to enable automatic execution of the ETL process based on the set trigger
-
-### Additional Notes:
-- For users with a free GCP account, delete load_balancer.tf and remove the output service_ip from main.tf in the Mage module.
-- If the credentials specified in variables.tf fail, export the credentials by running the command: `export GOOGLE_APPLICATION_CREDENTIALS="secrets.json"` in the terminal.
-- If the SQL database is created and deleted, wait before reusing the same name to avoid Error 409. Modify the name in the db.tf Google SQL database instance.
-- The volume secrets and IAM user have been commented due to role permissions in GCP.
-- During apply and destroy, multiple runs may be necessary with intervals between each run to allow time for deploying/deleting dependent resources.
 
 ## Spark
 
