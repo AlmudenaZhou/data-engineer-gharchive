@@ -47,6 +47,8 @@ All Google Cloud infrastructure has been handled using Terraform (IaC).
 1. Structure the data with pyspark into a BigQuery table
 1. Analyze the BigQuery data in Looker Studio
 
+![image](img/gharchive_fig.png)
+
 ## Google credentials
 
 For all the cloud-based steps, google requires credentials. Follow these steps to prepare them for the project:
