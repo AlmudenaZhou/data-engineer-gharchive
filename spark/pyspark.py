@@ -56,6 +56,7 @@ if __name__ == '__main__':
     df.repartition(1) \
         .write.format('bigquery') \
         .option("partitionField", "action_time") \
+        .option("partitionType", "HOUR") \
         .option("clusteredFields", "last_actor_login") \
         .option("table", output) \
         .mode("overwrite") \
